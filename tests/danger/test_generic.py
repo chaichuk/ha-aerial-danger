@@ -72,6 +72,13 @@ GENERIC_CASES: list[str] = [
     "Бровари підліт. Ви його не почуєте. Від вікон.",
 ]
 
+VASYLKIV_GENERIC_CASES: list[str] = [
+    "На Васильків підлітає",
+    "Васильків, над містом",
+    "Васильків увага",
+    "Васік увага",
+]
+
 REGION_ONLY_INCOMING_WEAPON_CASES: list[tuple[str, str]] = [
     (r"\bки(ї|є)в(а|у|ом|е|і)?\b", "🟡💣 Київ!"),
     (r"\bхарків(а|у|ом|і)?\b", "🔴❗️ РСЗВ на Харків!"),
@@ -121,6 +128,19 @@ def test_generic_only() -> None:
         assert detection.danger is True, text
         assert detection.type == DangerType.GENERIC, text
         assert detector.danger(text).type == DangerType.GENERIC, text
+
+
+def test_vasylkiv_channel_messages_match_selected_locality() -> None:
+    """Kyiv AirDefense's terse Vasylkiv messages should match its locality."""
+    detector = DangerDetector(
+        REGION_PATTERNS,
+        [r"\bвасильк(ів|ова|ову|овом|ові)\b", r"\bвасік\b"],
+    )
+    for text in VASYLKIV_GENERIC_CASES:
+        detection = detector.danger(text)
+
+        assert detection.danger is True, text
+        assert detection.type == DangerType.GENERIC, text
 
 
 def test_weapon_messages_do_not_fall_through_to_generic() -> None:

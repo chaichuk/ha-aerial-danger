@@ -79,6 +79,9 @@ PRESET_EXAMPLES = {
         "Київською областю",
     ),
     "kyiv_oblast_bila_tserkva": ("Білої Церкви", "Білу Церкву", "БЦ"),
+    "kyiv_oblast_bilohorodka": ("Білогородку",),
+    "kyiv_oblast_boiarka": ("Боярку",),
+    "kyiv_oblast_borodianka": ("Бородянку",),
     "kyiv_oblast_boryspil": (
         "Борисполя",
         "Борисполю",
@@ -86,6 +89,33 @@ PRESET_EXAMPLES = {
         "Борисполі",
         "Борік",
     ),
+    "kyiv_oblast_demydiv": ("Демидові",),
+    "kyiv_oblast_hnidyn": ("Гнідин",),
+    "kyiv_oblast_hlevakha": ("Глеваху",),
+    "kyiv_oblast_irpin": ("Ірпінь",),
+    "kyiv_oblast_ivankiv": ("Іванків",),
+    "kyiv_oblast_ivankovychi": ("Іванковичі",),
+    "kyiv_oblast_katiuzhanka": ("Катюжанку",),
+    "kyiv_oblast_kniazhychi": ("Княжичі",),
+    "kyiv_oblast_kozyn": ("Козин",),
+    "kyiv_oblast_kriukivshchyna": ("Крюківщину",),
+    "kyiv_oblast_krushynka": ("Крушинку",),
+    "kyiv_oblast_liutizh": ("Лютожі",),
+    "kyiv_oblast_makariv": ("Макарів",),
+    "kyiv_oblast_motyzhyn": ("Мотижин",),
+    "kyiv_oblast_muzychi": ("Музичі",),
+    "kyiv_oblast_novi_petrivtsi": ("Нових Петрівцях",),
+    "kyiv_oblast_oshchyna": ("Осещиною",),
+    "kyiv_oblast_prolisky": ("Проліски",),
+    "kyiv_oblast_revne": ("Ревне",),
+    "kyiv_oblast_sofiivska_borshchahivka": ("Софіївська Борщагівка",),
+    "kyiv_oblast_slavutych": ("Славутич",),
+    "kyiv_oblast_stari_petrivtsi": ("Старих Петрівцях",),
+    "kyiv_oblast_vasylkiv": ("Василькова", "Васильків", "Васік"),
+    "kyiv_oblast_vyshneve": ("Вишневе",),
+    "kyiv_oblast_vita_poshtova": ("Віта-Поштова",),
+    "kyiv_oblast_zazyma": ("Зазим'я",),
+    "kyiv_oblast_zabiria": ("Забірʼя",),
     "luhansk_oblast": ("Луганщиною", "Луганській області"),
     "luhansk_oblast_luhansk": ("Луганську",),
     "lviv_oblast": ("Львівщиною", "Львівській області"),
@@ -234,6 +264,32 @@ def test_preset_examples() -> None:
                 re.search(pattern, text, re.IGNORECASE | re.UNICODE)
                 for pattern in patterns_by_id[preset_id]
             ), (preset_id, text)
+
+
+@pytest.mark.parametrize(
+    ("message", "method_name", "danger_type"),
+    [
+        ("Осещина увага!", "generic_danger", "generic"),
+        ("Балістика на Осещину!", "ballistic_danger", "ballistic"),
+        ("Крилата ракета на Осещину!", "cruise_missile_danger", "cruise"),
+        ("🛵 Шахед на Осещину!", "drone_danger", "drone"),
+        ("РСЗВ на Осещину!", "mlrs_danger", "mlrs"),
+        ("КАБ на Осещину!", "guided_bomb_danger", "guided_bomb"),
+    ],
+)
+def test_oshchyna_matches_every_area_dependent_danger(
+    message: str, method_name: str, danger_type: str
+) -> None:
+    """Oleshchyna must activate each danger type that requires an area."""
+    localities = resolve_locality_patterns(
+        [], ["kyiv_oblast"], ["kyiv_oblast_oshchyna"]
+    )
+    detector = DangerDetector([], localities)
+
+    detection = getattr(detector, method_name)(message)
+
+    assert detection.danger is True
+    assert detection.type.value == danger_type
 
 
 def test_boundaries_and_safe_location_text() -> None:
