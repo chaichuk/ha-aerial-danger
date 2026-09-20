@@ -19,14 +19,16 @@ blueprint:
         device:
           filter:
             - integration: aerial_danger
-    mobile_devices:
-      name: Пристрої для сповіщення
-      description: Виберіть один або декілька пристроїв для отримання критичних сповіщень.
+    notify_entities:
+      name: Телефони для сповіщення
+      description: >-
+        Виберіть одну або декілька сутностей сповіщення для ваших телефонів 
+        (шукайте ті, що починаються на notify.mobile_app_...).
       selector:
-        device:
+        entity:
           multiple: true
           filter:
-            - integration: mobile_app
+            - domain: notify
     notification_cooldown:
       name: Затримка між сповіщеннями
       description: >-
@@ -45,7 +47,7 @@ triggers:
 actions:
   - action: notify.send_message
     target:
-      device_id: !input mobile_devices
+      entity_id: !input notify_entities
     data:
       title: Повітряна загроза
       message: >-
